@@ -81,6 +81,16 @@ auto Image::check_cache(const Dimensions &dimensions, const fs::path &orig_path)
         return orig_path;
     }
 
+    try {
+        const auto cache_time = fs::last_write_time(cache_path);
+        const auto orig_time = fs::last_write_time(orig_path);
+        if (cache_time < orig_time) {
+            return orig_path;
+        }
+    } catch (const fs::filesystem_error &e) {
+        return orig_path;
+    }
+
     vips::VImage cache_img;
     try {
         cache_img = vips::VImage::new_from_file(cache_path.c_str());
