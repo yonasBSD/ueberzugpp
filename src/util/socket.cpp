@@ -29,6 +29,10 @@
 #include "os.hpp"
 #include "util.hpp"
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 namespace fs = std::filesystem;
 
 UnixSocket::UnixSocket(const std::string_view endpoint)
