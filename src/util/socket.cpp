@@ -147,6 +147,31 @@ void UnixSocket::read(void *data, std::size_t len) const
     }
 }
 
+auto UnixSocket::read_line() const -> std::string
+{
+    if (!connected) {
+        return {};
+    }
+
+    std::string result;
+    char readch = 0;
+
+    while (true) {
+        const auto status = recv(fd, &readch, 1, 0);
+        if (status == 0) {
+            break;
+        }
+        if (status == -1) {
+            throw std::system_error(errno, std::generic_category());
+        }
+        if (readch == '\n') {
+            break;
+        }
+        result.push_back(readch);
+    }
+    return result;
+}
+
 auto UnixSocket::read_until_empty() const -> std::string
 {
     std::string result;
