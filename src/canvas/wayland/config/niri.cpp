@@ -63,6 +63,22 @@ auto scaled_coord(double value, float scale) -> int
     return static_cast<int>(std::lround(value * scale));
 }
 
+auto read_niri_response(const UnixSocket &socket) -> std::string
+{
+    std::string response;
+    char readch = '\0';
+
+    while (true) {
+        readch = '\0';
+        socket.read(&readch, sizeof(readch));
+        if (readch == '\0' || readch == '\n') {
+            break;
+        }
+        response.push_back(readch);
+    }
+    return response;
+}
+
 } // namespace
 
 NiriSocket::NiriSocket(const std::string_view endpoint)
@@ -147,7 +163,7 @@ auto NiriSocket::request(const njson &payload) const -> njson
     const auto request_payload = fmt::format("{}\n", payload.dump());
     socket.write(request_payload.data(), request_payload.size());
 
-    const auto response = njson::parse(socket.read_line());
+    const auto response = njson::parse(read_niri_response(socket));
     if (response.contains("Err")) {
         throw std::runtime_error(fmt::format("niri IPC error: {}", response.at("Err").dump()));
     }
