@@ -20,12 +20,23 @@
 #include "util.hpp"
 
 #include <fmt/format.h>
-#include <libproc.h>
 #include <sys/types.h>
+
+#include <AvailabilityMacros.h>
+
+// PROC_PIDT_SHORTBSDINFO was introduced in macOS 10.7
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1070
+#include <libproc.h>
+#define HAVE_PROC_PIDINFO
+#else
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#endif
 
 Process::Process(int pid)
     : pid(pid)
 {
+#ifdef HAVE_PROC_PIDINFO
     struct proc_bsdshortinfo sproc;
     struct proc_bsdinfo proc;
 
@@ -40,4 +51,16 @@ Process::Process(int pid)
         minor_dev = minor(tty_nr);
         pty_path = fmt::format("/dev/ttys{:0>3}", minor_dev);
     }
+#else
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid};
+    struct kinfo_proc kp;
+    size_t size = sizeof(kp);
+
+    if (sysctl(mib, 4, &kp, &size, NULL, 0) == 0 && size == sizeof(kp)) {
+        ppid = static_cast<int>(kp.kp_eproc.e_ppid);
+        tty_nr = static_cast<int>(kp.kp_eproc.e_tdev);
+        minor_dev = minor(tty_nr);
+        pty_path = fmt::format("/dev/ttys{:0>3}", minor_dev);
+    }
+#endif
 }
