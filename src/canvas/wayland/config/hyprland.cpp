@@ -115,25 +115,25 @@ void HyprlandSocket::initial_setup(const std::string_view appid)
 
 void HyprlandSocket::remove_rounding(const std::string_view appid)
 {
-    const auto payload = fmt::format("/keyword windowrulev2 rounding 0,title:{}", appid);
+    const auto payload = fmt::format("/keyword windowrule match:title {},rounding 0", appid);
     request(payload);
 }
 
 void HyprlandSocket::disable_focus(const std::string_view appid)
 {
-    const auto payload = fmt::format("/keyword windowrulev2 nofocus,title:{}", appid);
+    const auto payload = fmt::format("/keyword windowrule match:title {}, no_focus on", appid);
     request(payload);
 }
 
 void HyprlandSocket::enable_floating(const std::string_view appid)
 {
-    const auto payload = fmt::format("/keyword windowrulev2 float,title:{}", appid);
+    const auto payload = fmt::format("/keyword windowrule match:title {}, float on", appid);
     request(payload);
 }
 
 void HyprlandSocket::remove_borders(const std::string_view appid)
 {
-    const auto payload = fmt::format("/keyword windowrulev2 noborder,title:{}", appid);
+    const auto payload = fmt::format("/keyword windowrule match:title {} border_size 0", appid);
     request(payload);
 }
 
