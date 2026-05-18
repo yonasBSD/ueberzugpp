@@ -15,14 +15,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "config.hpp"
-#include "os.hpp"
-#include "config/sway.hpp"
-#include "config/hyprland.hpp"
-#include "config/wayfire.hpp"
 #include "config/dummy.hpp"
+#include "config/hyprland.hpp"
+#include "config/niri.hpp"
+#include "config/sway.hpp"
+#include "config/wayfire.hpp"
+#include "os.hpp"
 
 auto WaylandConfig::get() -> std::unique_ptr<WaylandConfig>
 {
+    const auto niri_sock = os::getenv("NIRI_SOCKET");
+    if (niri_sock.has_value()) {
+        return std::make_unique<NiriSocket>(niri_sock.value());
+    }
+
     const auto sway_sock = os::getenv("SWAYSOCK");
     if (sway_sock.has_value()) {
         return std::make_unique<SwaySocket>(sway_sock.value());
@@ -40,4 +46,3 @@ auto WaylandConfig::get() -> std::unique_ptr<WaylandConfig>
 
     return std::make_unique<DummyWaylandConfig>();
 }
-
