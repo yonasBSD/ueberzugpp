@@ -24,6 +24,7 @@
 #include <tuple>
 
 #include <fmt/format.h>
+#include <range/v3/all.hpp>
 
 using njson = nlohmann::json;
 
@@ -191,7 +192,7 @@ auto NiriSocket::find_window(const std::string_view appid) const -> std::optiona
     constexpr auto attempts = 20;
     for (int attempt = 0; attempt < attempts; ++attempt) {
         const auto windows = get_windows();
-        const auto found = std::ranges::find_if(windows, [&appid_str](const njson &window) {
+        const auto found = ranges::find_if(windows, [&appid_str](const njson &window) {
             return string_value(window, "app_id") == appid_str || string_value(window, "title") == appid_str;
         });
         if (found != windows.end()) {
@@ -206,7 +207,7 @@ auto NiriSocket::get_terminal_window() -> njson
 {
     const auto windows = get_windows();
     if (terminal_window_id.has_value()) {
-        const auto found = std::ranges::find_if(
+        const auto found = ranges::find_if(
             windows, [this](const njson &window) { return json_window_id(window) == terminal_window_id.value(); });
         if (found != windows.end()) {
             return *found;
