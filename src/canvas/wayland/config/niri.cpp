@@ -196,7 +196,7 @@ auto NiriSocket::find_window(const std::string_view appid) const -> std::optiona
             return string_value(window, "app_id") == appid_str || string_value(window, "title") == appid_str;
         });
         if (found != windows.end()) {
-            return *found;
+            return std::make_optional<njson>(*found);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
